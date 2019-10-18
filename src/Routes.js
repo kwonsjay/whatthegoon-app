@@ -8,16 +8,18 @@ import Signup from "./containers/Signup";
 import NewPost from "./containers/NewPost";
 import Posts from "./containers/Posts";
 import Settings from "./containers/Settings";
+import AuthenticatedRoute from "./components/AuthenticatedRoute";
+import UnauthenticatedRoute from "./components/UnauthenticatedRoute";
 
 export default function Routes({ appProps }) {
   return (
     <Switch>
       <AppliedRoute path="/" exact component={Home} appProps={appProps} />
-      <AppliedRoute path="/login" exact component={Login} appProps={appProps} />
-      <AppliedRoute path="/signup" exact component={Signup} appProps={appProps} />
-      <AppliedRoute path="/posts/new" exact component={NewPost} appProps={appProps} />
-      <AppliedRoute path="/posts/:id" exact component={Posts} appProps={appProps} />
-      <AppliedRoute path="/settings" exact component={Settings} appProps={appProps} />
+			<UnauthenticatedRoute path="/login" exact component={Login} appProps={appProps} />
+			<UnauthenticatedRoute path="/signup" exact component={Signup} appProps={appProps} />
+			<AuthenticatedRoute path="/settings" exact component={Settings} appProps={appProps} />
+			<AuthenticatedRoute path="/posts/new" exact component={NewPost} appProps={appProps} />
+			<AuthenticatedRoute path="/posts/:id" exact component={Posts} appProps={appProps} />
       <Route component={NotFound} />
     </Switch>
   );
