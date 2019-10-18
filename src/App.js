@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Link, withRouter } from "react-router-dom";
-import { Nav, Navbar, NavItem } from "react-bootstrap";
-import { LinkContainer } from "react-router-bootstrap";
+import { withRouter } from "react-router-dom";
+// import { Nav, Navbar, NavItem } from "react-bootstrap";
+import 'react-bulma-components/dist/react-bulma-components.min.css';
+import { Button, Navbar, Container } from 'react-bulma-components/dist';
+// import { LinkContainer } from "react-router-bootstrap";
 import { Auth } from "aws-amplify";
 import Routes from "./Routes";
 import "./App.css";
+import logo from "./assets/logo.png";
 
 function App(props) {
   const [isAuthenticating, setIsAuthenticating] = useState(true);
@@ -35,37 +38,40 @@ function App(props) {
 
   return (
     !isAuthenticating && 
-    <div className="App container">
-      <Navbar fluid collapseOnSelect>
-        <Navbar.Header>
+    <div className="App">
+      <Navbar className="is-spaced">
+        <Container>
           <Navbar.Brand>
-            <Link to="/">WhatTheGoon</Link>
+            <Navbar.Item renderAs="a" href="/">
+              <img src={logo} alt="logo" />
+            </Navbar.Item>
           </Navbar.Brand>
-          <Navbar.Toggle />
-        </Navbar.Header>
-        <Navbar.Collapse>
-          <Nav pullRight>
-            {
-              isAuthenticated ? (
-                <>
-                  <LinkContainer to="/settings">
-                    <NavItem>Settings</NavItem>
-                  </LinkContainer>
-                  <NavItem onClick={handleLogout}>Logout</NavItem>
-                </>
-              ) : (
-                <>
-                  <LinkContainer to="/signup">
-                    <NavItem>Signup</NavItem>
-                  </LinkContainer>
-                  <LinkContainer to="/login">
-                    <NavItem>Login</NavItem>
-                  </LinkContainer>
-                </>
-              )
-            }
-          </Nav>
-        </Navbar.Collapse>
+          <Navbar.Menu>
+            <Navbar.Container position="end">
+              {
+                isAuthenticated ? (
+                  <>
+                    <Navbar.Item renderAs="div">
+                      <div className="buttons">
+                        <Button renderAs="a" href="/settings" className="is-primary is-outlined">Settings</Button>
+                        <Button renderAs="a" onClick={handleLogout} className="is-danger is-outlined">Logout</Button>
+                      </div>
+                    </Navbar.Item>
+                  </>
+                ) : (
+                  <>
+                    <Navbar.Item renderAs="div">
+                      <div className="buttons">
+                        <Button renderAs="a" href="/signup" className="is-primary is-outlined">Signup</Button>
+                        <Button renderAs="a" href="/login" className="is-primary is-outlined">Login</Button>
+                      </div>
+                    </Navbar.Item>
+                  </>
+                )
+              }
+            </Navbar.Container>
+          </Navbar.Menu>
+        </Container>
       </Navbar>
       <Routes appProps={{ isAuthenticated, userHasAuthenticated }} />
     </div>

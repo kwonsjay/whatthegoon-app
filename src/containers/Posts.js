@@ -1,7 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import { API, Storage } from "aws-amplify";
-import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
+// import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
+// import LoaderButton from "../components/LoaderButton";
+import 'react-bulma-components/dist/react-bulma-components.min.css';
+import { Button, Columns, Box, Form, Icon } from 'react-bulma-components/dist';
 import config from "../config";
 import { s3Upload } from "../libs/awsLib";
 import "./Posts.css";
@@ -145,65 +147,50 @@ export default function Posts(props) {
   }
 
   return (
-    <div className="Posts">
-      {post && (
-        <form onSubmit={handleSubmit}>
-          <FormGroup controlId="content">
-            <FormControl
-              value={content}
-              componentClass="textarea"
-              onChange={e => setContent(e.target.value)}
-            />
-          </FormGroup>
-          {post.attachment && (
-            <FormGroup>
-              <ControlLabel>Attachment</ControlLabel>
-              <FormControl.Static>
-                <a
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={post.attachmentURL}
-                >
-                  {formatFilename(post.attachment)}
-                </a>
-                <LoaderButton
-                  block
-                  bsStyle="danger"
-                  onClick={handleFileDelete}
-                  isLoading={isDeletingFile}
-                >
-                  Delete File
-                </LoaderButton>
-              </FormControl.Static>
-            </FormGroup>
-          )}
-          {!post.attachment && (
-            <FormGroup controlId="file">
-              <ControlLabel>Attachment</ControlLabel>
-              <FormControl onChange={handleFileChange} type="file" />
-            </FormGroup>
-          )}
-          <LoaderButton
-            block
-            type="submit"
-            bsSize="large"
-            bsStyle="primary"
-            isLoading={isLoading}
-            disabled={!validateForm()}
-          >
-            Save
-          </LoaderButton>
-          <LoaderButton
-            block
-            bsSize="large"
-            bsStyle="danger"
-            onClick={handleDelete}
-            isLoading={isDeleting}
-          >
-            Delete
-          </LoaderButton>
-        </form>
-      )}
-    </div>
+    <Columns className="Posts">
+      <Columns.Column size={4} offset={4}>
+        {post && (
+          <Box>
+            <Form.Field>
+              <Form.Label>Content</Form.Label>
+              <Form.Control>
+                <Form.Textarea name="content" value={content} onChange={e => setContent(e.target.value)} />
+              </Form.Control>
+            </Form.Field>
+            {post.attachment && (
+              <Form.Field kind="group">
+                <Form.Label>Attachment</Form.Label>
+                <Form.Control>
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={post.attachmentURL}
+                  >
+                    {formatFilename(post.attachment)}
+                  </a>
+                  <Button loading={isDeletingFile} onClick={handleFileDelete} className="is-danger">Delete File</Button>
+                </Form.Control>
+              </Form.Field>
+            )}
+            {!post.attachment && (
+              <Form.Field>
+                <Form.Label>Attachment</Form.Label>
+                <Form.Control>
+                  <Form.InputFile name="file" onChange={handleFileChange} type="file" icon={<Icon icon="upload" />} boxed />
+                </Form.Control>
+              </Form.Field>
+            )}
+            <Form.Field kind="group">
+              <Form.Control>
+                <div className="buttons">
+                  <Button loading={isLoading} disabled={!validateForm()} onClick={handleSubmit}>Save</Button>
+                  <Button loading={isDeleting} onClick={handleDelete} className="is-danger">Delete</Button>
+                </div>
+              </Form.Control>
+            </Form.Field>
+          </Box>
+        )}
+      </Columns.Column>
+    </Columns>
   );
 }

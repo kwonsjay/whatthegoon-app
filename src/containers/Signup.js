@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { Auth } from "aws-amplify";
-import {
-  Modal,
-  HelpBlock,
-  FormGroup,
-  FormControl,
-  ControlLabel
-} from "react-bootstrap";
-import LoaderButton from "../components/LoaderButton";
+// import {
+//   Modal,
+//   HelpBlock,
+//   FormGroup,
+//   FormControl,
+//   ControlLabel
+// } from "react-bootstrap";
+// import LoaderButton from "../components/LoaderButton";
+import 'react-bulma-components/dist/react-bulma-components.min.css';
+import { Button, Columns, Box, Form, Notification } from 'react-bulma-components/dist';
 import { useFormFields } from "../libs/hooksLib";
 import "./Signup.css";
 
@@ -19,7 +21,7 @@ export default function Signup(props) {
     confirmationCode: ""
   });
   const [newUser, setNewUser] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   const [bypass, setBypass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -29,7 +31,9 @@ export default function Signup(props) {
     return (
       fields.email.length > 0 &&
       fields.password.length > 0 &&
-      fields.password === fields.confirmPassword
+      fields.password === fields.confirmPassword &&
+      !isConfirmed &&
+      !showMessage
     );
   }
 
@@ -37,8 +41,16 @@ export default function Signup(props) {
     return fields.confirmationCode.length > 0;
   }
 
-  function handleModalClose() {
-    setShowModal(false);
+  function handleMessageClose() {
+    setShowMessage(false);
+  }
+
+  function resetForm() {
+    fields.email = "";
+    fields.password = "";
+    fields.confirmPassword = "";
+    setIsConfirmed(false);
+    setShowMessage(false);
   }
 
   async function handleSubmit(event) {
@@ -54,7 +66,7 @@ export default function Signup(props) {
       setNewUser(newUser);
     } catch (e) {
       if (e.name === 'UsernameExistsException') {
-        setShowModal(true);
+        setShowMessage(true);
       }
       setIsLoading(false);
     }
@@ -82,7 +94,7 @@ export default function Signup(props) {
     try {
       await Auth.resendSignUp(fields.email);
       setIsSending(false);
-      setShowModal(false);
+      setShowMessage(false);
       setBypass(true);
     } catch (e) {
       if (e.name === 'InvalidParameterException') {
@@ -94,103 +106,78 @@ export default function Signup(props) {
 
   function renderConfirmationForm() {
     return (
-      <form onSubmit={handleConfirmationSubmit}>
-        <FormGroup controlId="confirmationCode" bsSize="large">
-          <ControlLabel>Confirmation Code</ControlLabel>
-          <FormControl
-            autoFocus
-            type="tel"
-            onChange={handleFieldChange}
-            value={fields.confirmationCode}
-          />
-          <HelpBlock>Please check your email for the code.</HelpBlock>
-        </FormGroup>
-        <LoaderButton
-          block
-          type="submit"
-          bsSize="large"
-          isLoading={isLoading}
-          disabled={!validateConfirmationForm()}
-        >
-          Verify
-        </LoaderButton>
-      </form>
+      <Columns.Column size={4} offset={4}>
+        <Box>
+          <Form.Field>
+            <Form.Label>Confirmation Code</Form.Label>
+            <Form.Control>
+              <Form.Input name="confirmationCode" value={fields.confirmationCode} onChange={handleFieldChange} type="tel" autoFocus />
+            </Form.Control>
+            <Form.Help>Please check your email for the code.</Form.Help>
+          </Form.Field>
+          <Form.Field kind="group">
+            <Form.Control>
+              <Button loading={isLoading} disabled={!validateConfirmationForm()} onClick={handleConfirmationSubmit}>Verify</Button>
+            </Form.Control>
+          </Form.Field>
+        </Box>
+      </Columns.Column>
     );
   }
 
   function renderForm() {
     return (
-      <>
-      <Modal show={showModal} onHide={handleModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Notification</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {
-            !isConfirmed ? (
-              <p>This account already exists!</p>
-            ) : (
-              <>
-                <p>This account has already been confirmed.</p>
-                <p>Please login.</p>
-              </>
-            )
-          }
-        </Modal.Body>
-        <Modal.Footer>
-          <LoaderButton
-            isLoading={isSending}
-            disabled={isConfirmed}
-            className="btn-primary"
-            onClick={resendVerification}
-          >
-            Resend Verification
-          </LoaderButton>
-        </Modal.Footer>
-      </Modal>
-      <form onSubmit={handleSubmit}>
-        <FormGroup controlId="email" bsSize="large">
-          <ControlLabel>Email</ControlLabel>
-          <FormControl
-            autoFocus
-            type="email"
-            value={fields.email}
-            onChange={handleFieldChange}
-          />
-        </FormGroup>
-        <FormGroup controlId="password" bsSize="large">
-          <ControlLabel>Password</ControlLabel>
-          <FormControl
-            type="password"
-            value={fields.password}
-            onChange={handleFieldChange}
-          />
-        </FormGroup>
-        <FormGroup controlId="confirmPassword" bsSize="large">
-          <ControlLabel>Confirm Password</ControlLabel>
-          <FormControl
-            type="password"
-            onChange={handleFieldChange}
-            value={fields.confirmPassword}
-          />
-        </FormGroup>
-        <LoaderButton
-          block
-          type="submit"
-          bsSize="large"
-          isLoading={isLoading}
-          disabled={!validateForm()}
-        >
-          Signup
-        </LoaderButton>
-      </form>
-      </>
+      <Columns.Column size={4} offset={4}>
+        { showMessage &&
+          <Notification color="primary">
+            { !isConfirmed ?
+              (
+                <p>This account already exists!</p>
+              ) : (
+                <>
+                  <p>This account has already been confirmed.</p>
+                  <p>Please proceed to log in.</p>
+                </>
+              )
+            }
+            <div className="buttons">
+              <Button className="is-primary is-inverted is-outlined" loading={isSending} disabled={isConfirmed} onClick={resendVerification}>Resend Verification</Button>
+              <Button className="is-primary is-inverted is-outlined" onClick={resetForm}>Reset Form</Button>
+            </div>
+          </Notification>
+        }
+        <Box>
+          <Form.Field>
+            <Form.Label>Email</Form.Label>
+            <Form.Control>
+              <Form.Input name="email" value={fields.email} onChange={handleFieldChange} type="email" autoFocus />
+            </Form.Control>
+          </Form.Field>
+          <Form.Field>
+            <Form.Label>Password</Form.Label>
+            <Form.Control>
+              <Form.Input name="password" value={fields.password} onChange={handleFieldChange} type="password" />
+            </Form.Control>
+          </Form.Field>
+          <Form.Field>
+            <Form.Label>Confirm Password</Form.Label>
+            <Form.Control>
+              <Form.Input name="confirmPassword" value={fields.confirmPassword} onChange={handleFieldChange} type="password" />
+            </Form.Control>
+          </Form.Field>
+          <Form.Field kind="group">
+            <Form.Control>
+              <Button loading={isLoading} disabled={!validateForm()} onClick={handleSubmit}>Signup</Button>
+            </Form.Control>
+          </Form.Field>
+        </Box>
+      </Columns.Column>
     );
   }
 
   return (
-    <div className="Signup">
+    <Columns className="Signup">
       {(newUser === null) && !bypass ? renderForm() : renderConfirmationForm()}
-    </div>
+    </Columns>
   );
 }

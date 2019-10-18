@@ -1,8 +1,10 @@
 import React, { useRef, useState } from "react";
-import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
+// import { FormGroup, FormControl, ControlLabel } from "react-bootstrap";
 import { API } from "aws-amplify";
 import { s3Upload } from "../libs/awsLib";
-import LoaderButton from "../components/LoaderButton";
+// import LoaderButton from "../components/LoaderButton";
+import 'react-bulma-components/dist/react-bulma-components.min.css';
+import { Button, Columns, Box, Form, Icon } from 'react-bulma-components/dist';
 import config from "../config";
 import "./NewPost.css";
 
@@ -52,30 +54,28 @@ export default function NewPost(props) {
   }
 
   return (
-    <div className="NewPost">
-      <form onSubmit={handleSubmit}>
-        <FormGroup controlId="content">
-          <FormControl
-            value={content}
-            componentClass="textarea"
-            onChange={e => setContent(e.target.value)}
-          />
-        </FormGroup>
-        <FormGroup controlId="file">
-          <ControlLabel>Attachment</ControlLabel>
-          <FormControl onChange={handleFileChange} type="file" />
-        </FormGroup>
-        <LoaderButton
-          block
-          type="submit"
-          bsSize="large"
-          bsStyle="primary"
-          isLoading={isLoading}
-          disabled={!validateForm()}
-        >
-          Create
-        </LoaderButton>
-      </form>
-    </div>
+    <Columns className="NewPost">
+      <Columns.Column size={4} offset={4}>
+        <Box>
+          <Form.Field>
+            <Form.Label>Content</Form.Label>
+            <Form.Control>
+              <Form.Textarea name="content" value={content} onChange={e => setContent(e.target.value)} autoFocus />
+            </Form.Control>
+          </Form.Field>
+          <Form.Field>
+            <Form.Label>Attachment</Form.Label>
+            <Form.Control>
+              <Form.InputFile name="file" onChange={handleFileChange} type="file" icon={<Icon icon="upload" />} boxed />
+            </Form.Control>
+          </Form.Field>
+          <Form.Field kind="group">
+            <Form.Control>
+              <Button loading={isLoading} disabled={!validateForm()} onClick={handleSubmit}>Create</Button>
+            </Form.Control>
+          </Form.Field>
+        </Box>
+      </Columns.Column>
+    </Columns>
   );
 }
