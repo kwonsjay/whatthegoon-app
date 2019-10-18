@@ -1,4 +1,6 @@
 export default {
+  MAX_ATTACHMENT_SIZE: 5000000,
+  STRIPE_KEY: "pk_test_4pfJMsvH44wv5memeiXnVFF100gCut0Jou",
   s3: {
     REGION: "us-east-1",
     BUCKET: "whatthegoon-uploads"
