@@ -22,6 +22,8 @@ export default function Signup(props) {
   const [showModal, setShowModal] = useState(false);
   const [bypass, setBypass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [isConfirmed, setIsConfirmed] = useState(false);
 
   function validateForm() {
     return (
@@ -75,16 +77,18 @@ export default function Signup(props) {
 
   async function resendVerification(event) {
     event.preventDefault();
-    setIsLoading(true);
+    setIsSending(true);
 
     try {
       await Auth.resendSignUp(fields.email);
-      setIsLoading(false);
+      setIsSending(false);
       setShowModal(false);
       setBypass(true);
     } catch (e) {
-      alert(e.message);
-      setIsLoading(false);
+      if (e.name === 'InvalidParameterException') {
+        setIsConfirmed(true);
+      }
+      setIsSending(false);
     }
   }
 
@@ -121,11 +125,23 @@ export default function Signup(props) {
         <Modal.Header closeButton>
           <Modal.Title>Notification</Modal.Title>
         </Modal.Header>
-        <Modal.Body>This account already exists!</Modal.Body>
+        <Modal.Body>
+          {
+            !isConfirmed ? (
+              <p>This account already exists!</p>
+            ) : (
+              <>
+                <p>This account has already been confirmed.</p>
+                <p>Please login.</p>
+              </>
+            )
+          }
+        </Modal.Body>
         <Modal.Footer>
           <LoaderButton
-            isLoading={isLoading}
-            variant="primary"
+            isLoading={isSending}
+            disabled={isConfirmed}
+            className="btn-primary"
             onClick={resendVerification}
           >
             Resend Verification
